@@ -4,7 +4,7 @@
 # @Author  : Salamander	(1906747819@qq.com)
 # @Link    : http://51lucy.com
 
-import os
+import os, random
 import tkinter as tk
 from PIL import Image, ImageTk
 
@@ -12,6 +12,11 @@ class MainWindow():
 	__gameTitle = "连连看游戏"
 	__windowWidth = 700
 	__windowHeigth = 500
+	__icons = []
+	__gameSize = 10 # 游戏尺寸
+	__iconKind = __gameSize * __gameSize / 4
+	__map = [] # 游戏地图
+	__delta = 10
 
 	def __init__(self):
 		self.root = tk.Tk()
@@ -33,19 +38,9 @@ class MainWindow():
 		self.canvas = tk.Canvas(self.root, bg = 'white', width = 450, height = 450)
 		self.canvas.pack(side=tk.TOP, pady = 5)
         
-		#self.canvas.grid(row = 0, padx = 5, pady = 5, sticky='ne')
-
-		x = 0
-		y = 0
-		w = 40
-		h = 40
-
-		im = Image.open(r'images\NARUTO.png')
-		region = im.crop((x, y, x+w, y+h))
-
-		photo = ImageTk.PhotoImage(region)
-		self.root.photo = photo  # to prevent the image garbage collected.
-		self.canvas.create_image((0,0), image=photo, anchor='nw')
+		self.extractSmallIconList()
+		self.iniMap()
+		self.drawMap()
 
 	def centerWindow(self, width, height):
 	    screenwidth = self.root.winfo_screenwidth()  
@@ -54,6 +49,53 @@ class MainWindow():
 	    self.root.geometry(size)
 	def file_new(self, event=None):
 		i = 10
+
+	'''
+	提取小头像数组
+	'''
+	def extractSmallIconList(self):
+		imageSouce = Image.open(r'images\NARUTO.png')
+		w = 40
+		h = 40
+		for index in range(0, int(self.__iconKind)):
+			region = imageSouce.crop((w * index, 0, w * index + w - 1, h - 1))
+			self.__icons.append(ImageTk.PhotoImage(region))
+
+	'''
+	初始化地图 存值为0-24
+	'''
+	def iniMap(self):
+		tmpRecords = []
+		records = []
+		for i in range(0, int(self.__iconKind)):
+			for j in range(0, 5):
+				tmpRecords.append(i)
+
+		total = self.__gameSize * self.__gameSize
+		for x in range(0, total):
+			index = random.randint(0, total - x - 1)
+			records.append(tmpRecords[index])
+			del tmpRecords[index]
+
+		# 一维数组转为二维，y为高维度
+		for y in range(0, self.__gameSize):
+			for x in range(0, self.__gameSize):
+				if x == 0:
+					self.__map.append([])
+				self.__map[y].append(records[x + y * self.__gameSize])
+
+	'''
+	根据地图绘制图像
+	'''
+	def drawMap(self):
+		w = 40
+		h = 40
+		for y in range(0, self.__gameSize):
+			for x in range(0, self.__gameSize):
+				self.canvas.create_image((x * w, y * h), 
+					image=self.__icons[self.__map[y][x]], anchor='nw')
+
+
 
 
 MainWindow()
