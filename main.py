@@ -14,9 +14,11 @@ class MainWindow():
 	__windowHeigth = 500
 	__icons = []
 	__gameSize = 10 # 游戏尺寸
-	__iconKind = __gameSize * __gameSize / 4
+	__iconKind = __gameSize * __gameSize / 4 # 小图片种类数量
+	__iconWidth = 40
+	__iconHeight = 40
 	__map = [] # 游戏地图
-	__delta = 10
+	__delta = 25
 
 	def __init__(self):
 		self.root = tk.Tk()
@@ -39,8 +41,6 @@ class MainWindow():
 		self.canvas.pack(side=tk.TOP, pady = 5)
         
 		self.extractSmallIconList()
-		self.iniMap()
-		self.drawMap()
 
 	def centerWindow(self, width, height):
 	    screenwidth = self.root.winfo_screenwidth()  
@@ -48,17 +48,17 @@ class MainWindow():
 	    size = '%dx%d+%d+%d' % (width, height, (screenwidth - width)/2, (screenheight - height)/2)
 	    self.root.geometry(size)
 	def file_new(self, event=None):
-		i = 10
+		self.iniMap()
+		self.drawMap()
 
 	'''
 	提取小头像数组
 	'''
 	def extractSmallIconList(self):
 		imageSouce = Image.open(r'images\NARUTO.png')
-		w = 40
-		h = 40
 		for index in range(0, int(self.__iconKind)):
-			region = imageSouce.crop((w * index, 0, w * index + w - 1, h - 1))
+			region = imageSouce.crop((self.__iconWidth * index, 0, 
+					self.__iconWidth * index + self.__iconWidth - 1, self.__iconHeight - 1))
 			self.__icons.append(ImageTk.PhotoImage(region))
 
 	'''
@@ -88,15 +88,10 @@ class MainWindow():
 	根据地图绘制图像
 	'''
 	def drawMap(self):
-		w = 40
-		h = 40
 		for y in range(0, self.__gameSize):
 			for x in range(0, self.__gameSize):
-				self.canvas.create_image((x * w, y * h), 
+				self.canvas.create_image((x * self.__iconWidth + self.__delta, y * self.__iconHeight + self.__delta), 
 					image=self.__icons[self.__map[y][x]], anchor='nw')
-
-
-
 
 MainWindow()
 
