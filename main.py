@@ -18,12 +18,14 @@ class MainWindow():
 	__iconWidth = 40
 	__iconHeight = 40
 	__map = [] # 游戏地图
+	__mapIcons = [] # 根据游戏地图存储的Canvas Image对象数组
 	__delta = 25
 
 	def __init__(self):
 		self.root = tk.Tk()
 		self.root.title(self.__gameTitle)
 		self.centerWindow(self.__windowWidth, self.__windowHeigth)
+		self.root.minsize(400, 450)
 
 		self.__addComponets()
 		self.root.mainloop()
@@ -39,6 +41,7 @@ class MainWindow():
 
 		self.canvas = tk.Canvas(self.root, bg = 'white', width = 450, height = 450)
 		self.canvas.pack(side=tk.TOP, pady = 5)
+		self.canvas.bind('<Button-1>', self.clickCanvas)
         
 		self.extractSmallIconList()
 
@@ -47,9 +50,14 @@ class MainWindow():
 	    screenheight = self.root.winfo_screenheight()  
 	    size = '%dx%d+%d+%d' % (width, height, (screenwidth - width)/2, (screenheight - height)/2)
 	    self.root.geometry(size)
+
+
 	def file_new(self, event=None):
 		self.iniMap()
 		self.drawMap()
+
+	def clickCanvas(self, event):
+		point = self.getInnerPoint({'x': event.x, 'y': event.y})
 
 	'''
 	提取小头像数组
@@ -89,11 +97,54 @@ class MainWindow():
 	根据地图绘制图像
 	'''
 	def drawMap(self):
+		self.__mapIcons = []
 		self.canvas.delete("all")
 		for y in range(0, self.__gameSize):
 			for x in range(0, self.__gameSize):
-				self.canvas.create_image((x * self.__iconWidth + self.__delta, y * self.__iconHeight + self.__delta), 
+				point = self.getOuterLeftTopPoint({'x': x, 'y': y})
+				im = self.canvas.create_image((point['x'], point['y']), 
 					image=self.__icons[self.__map[y][x]], anchor='nw')
+				if x == 0:
+					self.__mapIcons.append([])
+				self.__mapIcons[y].append(im)
+
+	'''
+	获取内部坐标对应矩形左上角顶点坐标
+	'''
+	def getOuterLeftTopPoint(self, point):
+		return {
+			'x': self.getX(point['x']),
+			'y': self.getY(point['y'])
+		}
+
+	def getX(self, x):
+		return x * self.__iconWidth + self.__delta
+
+	def getY(self, y):
+		return y * self.__iconWidth + self.__delta
+
+	'''
+	获取内部坐标
+	'''
+	def getInnerPoint(self, point):
+		x = -1
+		y = -1
+
+		for i in range(0, self.__gameSize):
+			x1 = self.getX(i)
+			x2 = self.getX(i + 1)
+			if point['x'] >= x1 and point['x'] < x2:
+				x = i
+
+		for j in range(0, self.__gameSize):
+			j1 = self.getY(j)
+			j2 = self.getY(j + 1)
+			if point['y'] >= j1 and point['y'] < j2:
+				y = j
+
+		return {'x': x, 'y': y}
+					
+
 
 MainWindow()
 
