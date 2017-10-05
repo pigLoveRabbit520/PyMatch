@@ -20,6 +20,8 @@ class MainWindow():
 	__map = [] # 游戏地图
 	__mapIcons = [] # 根据游戏地图存储的Canvas Image对象数组
 	__delta = 25
+	__isFirst = True
+	__formerPoint = ''
 
 	def __init__(self):
 		self.root = tk.Tk()
@@ -57,7 +59,16 @@ class MainWindow():
 		self.drawMap()
 
 	def clickCanvas(self, event):
-		point = self.getInnerPoint({'x': event.x, 'y': event.y})
+		point = self.getInnerPoint(Point(event.x, event.y))
+		# 有效点击坐标
+		if point.x >= 0 and point.y >= 0:
+			if self.__isFirst:
+				self.drawSelectedArea(point)
+				self.__isFirst= False
+				self.__formerPoint = point
+			else:
+				# TODO
+				i = 1
 
 	'''
 	提取小头像数组
@@ -101,8 +112,8 @@ class MainWindow():
 		self.canvas.delete("all")
 		for y in range(0, self.__gameSize):
 			for x in range(0, self.__gameSize):
-				point = self.getOuterLeftTopPoint({'x': x, 'y': y})
-				im = self.canvas.create_image((point['x'], point['y']), 
+				point = self.getOuterLeftTopPoint(Point(x, y))
+				im = self.canvas.create_image((point.x, point.y), 
 					image=self.__icons[self.__map[y][x]], anchor='nw')
 				if x == 0:
 					self.__mapIcons.append([])
@@ -112,11 +123,8 @@ class MainWindow():
 	获取内部坐标对应矩形左上角顶点坐标
 	'''
 	def getOuterLeftTopPoint(self, point):
-		return {
-			'x': self.getX(point['x']),
-			'y': self.getY(point['y'])
-		}
-
+		return Point(self.getX(point.x), self.getY(point.y))
+		
 	def getX(self, x):
 		return x * self.__iconWidth + self.__delta
 
@@ -133,16 +141,31 @@ class MainWindow():
 		for i in range(0, self.__gameSize):
 			x1 = self.getX(i)
 			x2 = self.getX(i + 1)
-			if point['x'] >= x1 and point['x'] < x2:
+			if point.x >= x1 and point.x < x2:
 				x = i
 
 		for j in range(0, self.__gameSize):
 			j1 = self.getY(j)
 			j2 = self.getY(j + 1)
-			if point['y'] >= j1 and point['y'] < j2:
+			if point.y >= j1 and point.y < j2:
 				y = j
 
-		return {'x': x, 'y': y}
+		return Point(x, y)
+
+	'''
+	选择的区域变红
+	'''
+	def drawSelectedArea(self, point):
+		pointLT = self.getOuterLeftTopPoint(point)
+		pointRB = self.getOuterLeftTopPoint(Point(point.x + 1, point.y + 1))
+		self.canvas.create_rectangle(pointLT.x, pointLT.y, 
+				pointRB.x - 1, pointRB.y - 1, outline = 'red', tags = "rectRed")
+
+
+class Point():
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
 					
 
 
