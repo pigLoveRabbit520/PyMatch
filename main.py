@@ -65,6 +65,7 @@ class MainWindow():
 	初始化地图 存值为0-24
 	'''
 	def iniMap(self):
+		self.__map = [] # 重置地图
 		tmpRecords = []
 		records = []
 		for i in range(0, int(self.__iconKind)):
@@ -88,6 +89,7 @@ class MainWindow():
 	根据地图绘制图像
 	'''
 	def drawMap(self):
+		self.canvas.delete("all")
 		for y in range(0, self.__gameSize):
 			for x in range(0, self.__gameSize):
 				self.canvas.create_image((x * self.__iconWidth + self.__delta, y * self.__iconHeight + self.__delta), 
