@@ -1,5 +1,9 @@
 import os
 
 
-for x in range(4, 4):
-    print('hello')
+def getName():
+	i = 1
+
+name = getName()
+
+print(name)

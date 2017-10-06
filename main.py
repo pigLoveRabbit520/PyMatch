@@ -18,11 +18,10 @@ class MainWindow():
 	__iconWidth = 40
 	__iconHeight = 40
 	__map = [] # 游戏地图
-	__mapIcons = [] # 根据游戏地图存储的Canvas Image对象数组
 	__delta = 25
 	__isFirst = True
 	__isGameStart = False
-	__formerPoint = ''
+	__formerPoint = None
 	EMPTY = -1
 	NONE_LINK = 0
 	STRAIGHT_LINK = 1
@@ -36,6 +35,8 @@ class MainWindow():
 		self.root.minsize(460, 460)
 
 		self.__addComponets()
+		self.extractSmallIconList()
+
 		self.root.mainloop()
 
 	def __addComponets(self):
@@ -51,7 +52,6 @@ class MainWindow():
 		self.canvas.pack(side=tk.TOP, pady = 5)
 		self.canvas.bind('<Button-1>', self.clickCanvas)
         
-		self.extractSmallIconList()
 
 	def centerWindow(self, width, height):
 	    screenwidth = self.root.winfo_screenwidth()  
@@ -69,7 +69,7 @@ class MainWindow():
 		if self.__isGameStart:
 			point = self.getInnerPoint(Point(event.x, event.y))
 			# 有效点击坐标
-			if point.x >= 0 and point.y >= 0:
+			if point.isUserful():
 				if self.__isFirst:
 					self.drawSelectedArea(point)
 					self.__isFirst= False
@@ -78,6 +78,16 @@ class MainWindow():
 					if self.__formerPoint.isEqual(point):
 						self.__isFirst = True
 						self.canvas.delete("rectRedOne")
+					else:
+						linkType = self.getLinkType(self.__formerPoint, point)
+						if linkType['Type'] != self.NONE_LINK:
+							# TODO
+
+							self.ClearLinkedBlocks(self.__formerPoint, point)
+							self.canvas.delete("rectRedOne")
+							self.__isFirst = True
+
+							
 
 	'''
 	提取小头像数组
@@ -117,22 +127,25 @@ class MainWindow():
 	根据地图绘制图像
 	'''
 	def drawMap(self):
-		self.__mapIcons = []
 		self.canvas.delete("all")
 		for y in range(0, self.__gameSize):
 			for x in range(0, self.__gameSize):
 				point = self.getOuterLeftTopPoint(Point(x, y))
 				im = self.canvas.create_image((point.x, point.y), 
-					image=self.__icons[self.__map[y][x]], anchor='nw')
-				if x == 0:
-					self.__mapIcons.append([])
-				self.__mapIcons[y].append(im)
+					image=self.__icons[self.__map[y][x]], anchor='nw', tags = 'im%d%d' % (x, y))
 
 	'''
 	获取内部坐标对应矩形左上角顶点坐标
 	'''
 	def getOuterLeftTopPoint(self, point):
 		return Point(self.getX(point.x), self.getY(point.y))
+
+	'''
+	获取内部坐标对应矩形中心坐标
+	'''
+	def getOuterCenterPoint(self, point):
+		return Point(self.getX(point.x) + int(self.__iconWidth / 2), 
+				self.getY(point.y) + int(self.__iconHeight / 2))
 		
 	def getX(self, x):
 		return x * self.__iconWidth + self.__delta
@@ -170,6 +183,17 @@ class MainWindow():
 		self.canvas.create_rectangle(pointLT.x, pointLT.y, 
 				pointRB.x - 1, pointRB.y - 1, outline = 'red', tags = "rectRedOne")
 
+
+	'''
+	消除连通的两个块
+	'''
+	def ClearLinkedBlocks(self, p1, p2):
+		self.__map[p1.y][p1.x] = self.EMPTY
+		self.__map[p2.y][p2.x] = self.EMPTY
+		self.canvas.delete('im%d%d' % (p1.x, p1.y))
+		self.canvas.delete('im%d%d' % (p2.x, p2.y))
+
+
 	'''
 	获取两个点连通类型
 	'''
@@ -183,8 +207,16 @@ class MainWindow():
 			return {
 				'Type': self.STRAIGHT_LINK
 			}
+		res = self.isOneCornerLink(p1, p2)
+		if not res:
+			return {
+				'Type': self.ONE_CORNER_LINK,
+				'p1': res
+			}
 
-		return self.NONE_LINK
+		return {
+			'Type': self.NONE_LINK
+		}
 
 
 	'''
@@ -213,11 +245,35 @@ class MainWindow():
 				return True
 		return False
 
+	def isOneCornerLink(self, p1, p2):
+		pointCorner = Point(p1.x, p2.y)
+		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
+			return pointCorner
+
+		pointCorner = Point(p2.x, p1.y)
+		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
+			return pointCorner
+
+	def isTwoCornerLink(self, p1, p2):
+		pointCorner = Point(p1.x, p2.y)
+		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
+			return pointCorner
+
+		pointCorner = Point(p2.x, p1.y)
+		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
+			return pointCorner
+
 
 class Point():
 	def __init__(self, x, y):
 		self.x = x
 		self.y = y
+
+	def isUserful(self):
+		if self.x >= 0 and self.y >= 0:
+			return True
+		else:
+			return False
 					
 	'''
 	判断两个点是否相同
