@@ -21,13 +21,14 @@ class MainWindow():
 	__mapIcons = [] # 根据游戏地图存储的Canvas Image对象数组
 	__delta = 25
 	__isFirst = True
+	__isGameStart = False
 	__formerPoint = ''
 
 	def __init__(self):
 		self.root = tk.Tk()
 		self.root.title(self.__gameTitle)
 		self.centerWindow(self.__windowWidth, self.__windowHeigth)
-		self.root.minsize(400, 450)
+		self.root.minsize(460, 460)
 
 		self.__addComponets()
 		self.root.mainloop()
@@ -57,18 +58,20 @@ class MainWindow():
 	def file_new(self, event=None):
 		self.iniMap()
 		self.drawMap()
+		self.__isGameStart = True
 
 	def clickCanvas(self, event):
-		point = self.getInnerPoint(Point(event.x, event.y))
-		# 有效点击坐标
-		if point.x >= 0 and point.y >= 0:
-			if self.__isFirst:
-				self.drawSelectedArea(point)
-				self.__isFirst= False
-				self.__formerPoint = point
-			else:
-				# TODO
-				i = 1
+		if self.__isGameStart:
+			point = self.getInnerPoint(Point(event.x, event.y))
+			# 有效点击坐标
+			if point.x >= 0 and point.y >= 0:
+				if self.__isFirst:
+					self.drawSelectedArea(point)
+					self.__isFirst= False
+					self.__formerPoint = point
+				else:
+					# TODO
+					i = 1
 
 	'''
 	提取小头像数组
@@ -129,7 +132,7 @@ class MainWindow():
 		return x * self.__iconWidth + self.__delta
 
 	def getY(self, y):
-		return y * self.__iconWidth + self.__delta
+		return y * self.__iconHeight + self.__delta
 
 	'''
 	获取内部坐标
