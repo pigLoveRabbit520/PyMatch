@@ -23,6 +23,11 @@ class MainWindow():
 	__isFirst = True
 	__isGameStart = False
 	__formerPoint = ''
+	EMPTY = -1
+	NONE_LINK = 0
+	STRAIGHT_LINK = 1
+	ONE_CORNER_LINK = 2
+	TWO_CORNER_LINK = 3
 
 	def __init__(self):
 		self.root = tk.Tk()
@@ -70,8 +75,9 @@ class MainWindow():
 					self.__isFirst= False
 					self.__formerPoint = point
 				else:
-					# TODO
-					i = 1
+					if self.__formerPoint.isEqual(point):
+						self.__isFirst = True
+						self.canvas.delete("rectRedOne")
 
 	'''
 	提取小头像数组
@@ -162,7 +168,50 @@ class MainWindow():
 		pointLT = self.getOuterLeftTopPoint(point)
 		pointRB = self.getOuterLeftTopPoint(Point(point.x + 1, point.y + 1))
 		self.canvas.create_rectangle(pointLT.x, pointLT.y, 
-				pointRB.x - 1, pointRB.y - 1, outline = 'red', tags = "rectRed")
+				pointRB.x - 1, pointRB.y - 1, outline = 'red', tags = "rectRedOne")
+
+	'''
+	获取两个点连通类型
+	'''
+	def getLinkType(self, p1, p2):
+		# 分析的时候，保证p2的x坐标为较大者
+		if p2.x < p1.x:
+			tmp = p1.clone()
+			p1.changeTo(p2)
+			p2.changeTo(tmp)
+		if self.isStraightLink(p1, p2):
+			return {
+				'Type': self.STRAIGHT_LINK
+			}
+
+		return self.NONE_LINK
+
+
+	'''
+	直连
+	'''
+	def isStraightLink(self, p1, p2):
+		# 水平
+		if p1.y == p2.y:
+			for x in range(p1.x + 1, p2.x):
+				if self.__map[p1.y][x] != self.EMPTY:
+					return False
+			return True
+		elif p1.x == p2.x:
+			start = -1
+			end = -1
+			if p1.y > p2.y:
+				start = p2.y
+				end = p1.y
+			else:
+				start = p1.y
+				end = p2.y
+
+			for y in range(start, end):
+				if self.__map[y][p1.x] != self.EMPTY:
+					return False
+				return True
+		return False
 
 
 class Point():
@@ -170,7 +219,28 @@ class Point():
 		self.x = x
 		self.y = y
 					
+	'''
+	判断两个点是否相同
+	'''
+	def isEqual(self, point):
+		if self.x == point.x and self.y == point.y:
+			return True
+		else:
+			return False
 
+	'''
+	克隆一份对象
+	'''
+	def clone(self):
+		return Point(self.x, self.y)
+
+
+	'''
+	改为另一个对象
+	'''
+	def changeTo(self, point):
+		self.x = point.x
+		self.y = point.y
 
 MainWindow()
 
