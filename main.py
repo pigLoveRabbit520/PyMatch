@@ -69,7 +69,7 @@ class MainWindow():
 		if self.__isGameStart:
 			point = self.getInnerPoint(Point(event.x, event.y))
 			# 有效点击坐标
-			if point.isUserful():
+			if point.isUserful() and not self.isEmptyInMap(point):
 				if self.__isFirst:
 					self.drawSelectedArea(point)
 					self.__isFirst= False
@@ -197,6 +197,14 @@ class MainWindow():
 		self.canvas.delete('im%d%d' % (p1.x, p1.y))
 		self.canvas.delete('im%d%d' % (p2.x, p2.y))
 
+	'''
+	地图上该点是否为空
+	'''
+	def isEmptyInMap(self, point):
+		if self.__map[point.y][point.x] == self.EMPTY:
+			return True
+		else:
+			return False
 
 	'''
 	获取两个点连通类型
@@ -262,11 +270,11 @@ class MainWindow():
 
 	def isOneCornerLink(self, p1, p2):
 		pointCorner = Point(p1.x, p2.y)
-		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
+		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2) and self.isEmptyInMap(pointCorner):
 			return pointCorner
 
 		pointCorner = Point(p2.x, p1.y)
-		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
+		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2) and self.isEmptyInMap(pointCorner):
 			return pointCorner
 
 	def isTwoCornerLink(self, p1, p2):
