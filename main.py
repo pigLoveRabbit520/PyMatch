@@ -81,15 +81,26 @@ class MainWindow():
 					else:
 						linkType = self.getLinkType(self.__formerPoint, point)
 						if linkType['type'] != self.NONE_LINK:
-							# TODO
-							print("连通方式%d" % linkType['type'])
+							# TODO Animation
 							self.ClearLinkedBlocks(self.__formerPoint, point)
 							self.canvas.delete("rectRedOne")
 							self.__isFirst = True
+							if self.isGameEnd():
+								tk.tkMessageBox.showinfo("You Win!", "Tip")
+								self.__isGameStart = False
 						else:
 							self.__formerPoint = point
 							self.canvas.delete("rectRedOne")
 							self.drawSelectedArea(point)
+
+
+	# 判断游戏是否结束
+	def isGameEnd(self):
+		for y in range(0, self.__gameSize):
+			for x in range(0, self.__gameSize):
+				if self.__map[y][x] != self.EMPTY:
+					return False
+		return True
 
 							
 
@@ -219,13 +230,13 @@ class MainWindow():
 				'type': self.STRAIGHT_LINK
 			}
 		res = self.isOneCornerLink(p1, p2)
-		if not res:
+		if res:
 			return {
 				'type': self.ONE_CORNER_LINK,
 				'p1': res
 			}
 		res = self.isTwoCornerLink(p1, p2)
-		if not res:
+		if res:
 			return {
 				'type': self.TWO_CORNER_LINK,
 				'p1': res['p1'],

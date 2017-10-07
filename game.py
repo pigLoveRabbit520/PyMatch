@@ -1,5 +1,13 @@
 import os
 
+class Person(object):
+	def __init__(self):
+		i = 1
 
-for x in range(1, 10)[::-1]:
-	print(x)
+
+p = Person()
+
+if p:
+	print('have')
+else:
+	print('no')
