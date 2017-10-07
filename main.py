@@ -298,7 +298,7 @@ class MainWindow():
 				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner2, p2):
 					return {'p1': pointCorner1, 'p2': pointCorner2}
 			else:
-				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner1, pointCorner2) and self.isStraightLink(pointCorner2, p2):
+				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner1, pointCorner2) and self.isStraightLink(pointCorner2, p2) and self.isEmptyInMap(pointCorner1) and self.isEmptyInMap(pointCorner2):
 					return {'p1': pointCorner1, 'p2': pointCorner2}
 
 		# 横向判断
@@ -311,7 +311,7 @@ class MainWindow():
 				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner2, p2):
 					return {'p1': pointCorner1, 'p2': pointCorner2}
 			else:
-				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner1, pointCorner2) and self.isStraightLink(pointCorner2, p2):
+				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner1, pointCorner2) and self.isStraightLink(pointCorner2, p2) and self.isEmptyInMap(pointCorner1) and self.isEmptyInMap(pointCorner2):
 					return {'p1': pointCorner1, 'p2': pointCorner2}
 
 
