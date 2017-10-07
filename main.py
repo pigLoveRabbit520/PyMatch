@@ -80,12 +80,16 @@ class MainWindow():
 						self.canvas.delete("rectRedOne")
 					else:
 						linkType = self.getLinkType(self.__formerPoint, point)
-						if linkType['Type'] != self.NONE_LINK:
+						if linkType['type'] != self.NONE_LINK:
 							# TODO
-
+							print("连通方式%d" % linkType['type'])
 							self.ClearLinkedBlocks(self.__formerPoint, point)
 							self.canvas.delete("rectRedOne")
 							self.__isFirst = True
+						else:
+							self.__formerPoint = point
+							self.canvas.delete("rectRedOne")
+							self.drawSelectedArea(point)
 
 							
 
@@ -175,7 +179,7 @@ class MainWindow():
 		return Point(x, y)
 
 	'''
-	选择的区域变红
+	选择的区域变红，point为内部坐标
 	'''
 	def drawSelectedArea(self, point):
 		pointLT = self.getOuterLeftTopPoint(point)
@@ -198,24 +202,29 @@ class MainWindow():
 	获取两个点连通类型
 	'''
 	def getLinkType(self, p1, p2):
-		# 分析的时候，保证p2的x坐标为较大者
-		if p2.x < p1.x:
-			tmp = p1.clone()
-			p1.changeTo(p2)
-			p2.changeTo(tmp)
+		# 首先判断两个方块中图片是否相同
+		if self.__map[p1.y][p1.x] != self.__map[p2.y][p2.x]:
+			return { 'type': self.NONE_LINK }
+
 		if self.isStraightLink(p1, p2):
 			return {
-				'Type': self.STRAIGHT_LINK
+				'type': self.STRAIGHT_LINK
 			}
 		res = self.isOneCornerLink(p1, p2)
 		if not res:
 			return {
-				'Type': self.ONE_CORNER_LINK,
+				'type': self.ONE_CORNER_LINK,
 				'p1': res
 			}
-
+		res = self.isTwoCornerLink(p1, p2)
+		if not res:
+			return {
+				'type': self.TWO_CORNER_LINK,
+				'p1': res['p1'],
+				'p2': res['p2']
+			}
 		return {
-			'Type': self.NONE_LINK
+			'type': self.NONE_LINK
 		}
 
 
@@ -223,26 +232,32 @@ class MainWindow():
 	直连
 	'''
 	def isStraightLink(self, p1, p2):
+		start = -1
+		end = -1
 		# 水平
 		if p1.y == p2.y:
-			for x in range(p1.x + 1, p2.x):
+			# 大小判断
+			if p2.x < p1.x:
+				start = p2.x
+				end = p1.x
+			else:
+				start = p1.x
+				end = p2.x
+			for x in range(start + 1, end):
 				if self.__map[p1.y][x] != self.EMPTY:
 					return False
 			return True
 		elif p1.x == p2.x:
-			start = -1
-			end = -1
 			if p1.y > p2.y:
 				start = p2.y
 				end = p1.y
 			else:
 				start = p1.y
 				end = p2.y
-
-			for y in range(start, end):
+			for y in range(start + 1, end):
 				if self.__map[y][p1.x] != self.EMPTY:
 					return False
-				return True
+			return True
 		return False
 
 	def isOneCornerLink(self, p1, p2):
@@ -255,13 +270,30 @@ class MainWindow():
 			return pointCorner
 
 	def isTwoCornerLink(self, p1, p2):
-		pointCorner = Point(p1.x, p2.y)
-		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
-			return pointCorner
+		for y in range(-1, self.__gameSize + 1):
+			pointCorner1 = Point(p1.x, y)
+			pointCorner2 = Point(p2.x, y)
+			if y == p1.y or y == p2.y:
+				continue
+			if y == -1 or y == self.__gameSize:
+				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner2, p2):
+					return {'p1': pointCorner1, 'p2': pointCorner2}
+			else:
+				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner1, pointCorner2) and self.isStraightLink(pointCorner2, p2):
+					return {'p1': pointCorner1, 'p2': pointCorner2}
 
-		pointCorner = Point(p2.x, p1.y)
-		if self.isStraightLink(p1, pointCorner) and self.isStraightLink(pointCorner, p2):
-			return pointCorner
+		# 横向判断
+		for x in range(-1, self.__gameSize + 1):
+			pointCorner1 = Point(x, p1.y)
+			pointCorner2 = Point(x, p2.y)
+			if x == p1.x or x == p2.x:
+				continue
+			if x == -1 or x == self.__gameSize:
+				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner2, p2):
+					return {'p1': pointCorner1, 'p2': pointCorner2}
+			else:
+				if self.isStraightLink(p1, pointCorner1) and self.isStraightLink(pointCorner1, pointCorner2) and self.isStraightLink(pointCorner2, p2):
+					return {'p1': pointCorner1, 'p2': pointCorner2}
 
 
 class Point():

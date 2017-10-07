@@ -1,9 +1,5 @@
 import os
 
 
-def getName():
-	i = 1
-
-name = getName()
-
-print(name)
+for x in range(1, 10)[::-1]:
+	print(x)
