@@ -6,6 +6,7 @@
 
 import os, random
 import tkinter as tk
+import tkinter.messagebox
 from PIL import Image, ImageTk
 
 class MainWindow():
@@ -86,7 +87,7 @@ class MainWindow():
 							self.canvas.delete("rectRedOne")
 							self.__isFirst = True
 							if self.isGameEnd():
-								tk.tkMessageBox.showinfo("You Win!", "Tip")
+								tk.messagebox.showinfo("You Win!", "Tip")
 								self.__isGameStart = False
 						else:
 							self.__formerPoint = point
@@ -122,7 +123,7 @@ class MainWindow():
 		tmpRecords = []
 		records = []
 		for i in range(0, int(self.__iconKind)):
-			for j in range(0, 5):
+			for j in range(0, 4):
 				tmpRecords.append(i)
 
 		total = self.__gameSize * self.__gameSize
