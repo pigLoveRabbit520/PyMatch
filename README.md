@@ -1,4 +1,4 @@
-# SalamanderPyMatch
+# PyMatch
 用Python Tkinter写的连连看小游戏
 
 # UI
