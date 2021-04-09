@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2017-10-02 15:19:24
 # @Author  : Salamander	(1906747819@qq.com)
-# @Link    : http://51lucy.com
+# @Link    : http://blog.51lucy.com
 
 import os, random
 import tkinter as tk
@@ -55,10 +55,10 @@ class MainWindow():
         
 
 	def centerWindow(self, width, height):
-	    screenwidth = self.root.winfo_screenwidth()  
-	    screenheight = self.root.winfo_screenheight()  
-	    size = '%dx%d+%d+%d' % (width, height, (screenwidth - width)/2, (screenheight - height)/2)
-	    self.root.geometry(size)
+		screenwidth = self.root.winfo_screenwidth()
+		screenheight = self.root.winfo_screenheight()
+		size = '%dx%d+%d+%d' % (width, height, (screenwidth - width)/2, (screenheight - height)/2)
+		self.root.geometry(size)
 
 
 	def file_new(self, event=None):
@@ -109,7 +109,9 @@ class MainWindow():
 	提取小头像数组
 	'''
 	def extractSmallIconList(self):
-		imageSouce = Image.open(r'images\NARUTO.png')
+		root_dir = os.getcwd()
+		imagePath = os.path.join(root_dir, 'images', 'NARUTO.png')
+		imageSouce = Image.open(imagePath)
 		for index in range(0, int(self.__iconKind)):
 			region = imageSouce.crop((self.__iconWidth * index, 0, 
 					self.__iconWidth * index + self.__iconWidth - 1, self.__iconHeight - 1))
@@ -351,5 +353,3 @@ class Point():
 		self.y = point.y
 
 MainWindow()
-
-
